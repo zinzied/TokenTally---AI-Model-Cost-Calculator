@@ -54,6 +54,8 @@ try:
 except Exception:
     tiktoken = None
 
+_BANNER_SHOWN = False
+
 PRICING_DATA: Dict[str, Dict[str, Dict[str, float]]] = {
     "openai": {
         "gpt-4o": {"input": 5.00, "output": 15.00},
@@ -203,6 +205,30 @@ def estimate_tokens_from_text(text: str, model: Optional[str] = None) -> int:
         except Exception:
             pass
     return int(round(len(text) / 4))
+
+def show_banner_animated() -> None:
+    global _BANNER_SHOWN
+    if _BANNER_SHOWN:
+        return
+    art = [
+        "▄▄▄█████▓ ▒█████   ██ ▄█▀▓█████  ███▄    █ ▄▄▄█████▓ ▄▄▄       ██▓     ██▓   ▓██   ██▓ ",
+        " ▓  ██▒ ▓▒▒██▒  ██▒ ██▄█▒ ▓█   ▀  ██ ▀█   █ ▓  ██▒ ▓▒▒████▄    ▓██▒    ▓██▒    ▒██  ██▒ ",
+        " ▒ ▓██░ ▒░▒██░  ██▒▓███▄░ ▒███   ▓██  ▀█ ██▒▒ ▓██░ ▒░▒██  ▀█▄  ▒██░    ▒██░     ▒██ ██░ ",
+        " ░ ▓██▓ ░ ▒██   ██░▓██ █▄ ▒▓█  ▄ ▓██▒  ▐▌██▒░ ▓██▓ ░ ░██▄▄▄▄██ ▒██░    ▒██░     ░ ▐██▓░ ",
+        "   ▒██▒ ░ ░ ████▓▒░▒██▒ █▄░▒████▒▒██░   ▓██░  ▒██▒ ░  ▓█   ▓██▒░██████▒░██████▒ ░ ██▒▓░ ",
+        "   ▒ ░░   ░ ▒░▒░▒░ ▒ ▒▒ ▓▒░░ ▒░ ░░ ▒░   ▒ ▒   ▒ ░░    ▒▒   ▓▒█░░ ▒░▓  ░░ ▒░▓  ░  ██▒▒▒ ",
+        "     ░      ░ ▒ ▒░ ░ ░▒ ▒░ ░ ░  ░░ ░░   ░ ▒░    ░      ▒   ▒▒ ░░ ░ ▒  ░░ ░ ▒  ░▓██ ░▒░ ",
+        "   ░      ░ ░ ░ ▒  ░ ░░ ░    ░      ░   ░ ░   ░        ░   ▒     ░ ░     ░ ░   ▒ ▒ ░░  ",
+        "              ░ ░  ░  ░      ░  ░         ░                ░  ░    ░  ░    ░  ░░ ░     ",
+        "                                                                               ░ ░",
+    ]
+    for line in art:
+        if Fore and Style:
+            print(Fore.MAGENTA + Style.BRIGHT + line + Style.RESET_ALL)
+        else:
+            print(line)
+        time.sleep(0.05)
+    _BANNER_SHOWN = True
 
 
 def validate_tokens(value: str) -> int:
@@ -925,6 +951,7 @@ def main(argv: Optional[List[str]] = None) -> None:
             colorama_init(autoreset=True)
         except Exception:
             pass
+    show_banner_animated()
     
     if Fore and Style:
         print(Fore.CYAN + Style.BRIGHT + "+=============================================================+" + Style.RESET_ALL)
