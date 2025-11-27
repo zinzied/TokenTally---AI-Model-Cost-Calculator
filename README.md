@@ -183,3 +183,8 @@ python tokentally.py --run-tests
 - TokenScope
 
 If you prefer a different name, tell us and we’ll update the menu banner and references accordingly.
+
+## Conclusion
+- TokenTally is an estimator. Actual costs vary with model behavior, tokenizer differences, pricing changes, and your chosen FX rate.
+- Exact token counts are known only after a real response (providers return usage). Use output caps and concise formats to keep costs predictable.
+- For best results, keep pricing data current, use templates or demo mode to approximate, and include non‑token costs that reflect your workflow.
