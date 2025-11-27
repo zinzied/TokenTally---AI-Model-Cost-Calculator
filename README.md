@@ -100,6 +100,19 @@ python tokentally.py \
   - `tokens ≈ characters / 4`
 - In demo mode, TokenTally estimates tokens from your pasted prompt. If `tiktoken` is installed, it uses a tokenizer; otherwise it falls back to character length.
 
+## Output Tokens Explained
+- Exact counts are only known after a real model response; providers return usage metadata (e.g., OpenAI `completion_tokens`, Anthropic `usage.output_tokens`).
+- Before generation, estimate output tokens in these ways:
+  - Paste a sample of the output you expect into interactive mode; TokenTally estimates tokens from your text.
+  - Use word/character heuristics: `tokens ≈ words × 0.75` or `tokens ≈ characters / 4`.
+  - Pick preset lengths in demo mode: Short (~200), Medium (~600), Long (~1500), or enter a custom cap.
+- Make outputs predictable:
+  - Set an explicit output cap in your generation settings (e.g., “limit to 400 tokens”).
+  - Ask for concise formats (bullet lists, short summaries, JSON schemas).
+  - Split large tasks into steps with smaller outputs.
+- Try it quickly:
+  - `python tokentally.py --demo` and choose an output length or estimate from words/chars.
+
 ## Pricing Data
 - Built‑in `PRICING_DATA` includes OpenAI, Anthropic, XAI, Google, Cohere, Mistral, Meta, plus common aliases.
 - Each entry stores USD prices per 1M tokens for input and output.
