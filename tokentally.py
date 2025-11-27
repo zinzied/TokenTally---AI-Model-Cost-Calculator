@@ -508,24 +508,34 @@ def interactive_prompt(registry: PricingRegistry) -> Dict[str, Any]:
     else:
         model = input("Model (e.g., gpt-4o): ").strip()
     print("Hint: tokens ≈ words × 0.75, or tokens ≈ characters / 4")
-    raw_in = input("Input tokens (e.g., 5000, 1m, 250k) or type 'words'/'chars': ").strip().lower()
-    if raw_in == "words":
+    raw_in = input("Input tokens (e.g., 5000, 1m, 250k), type 'words'/'chars', or paste text: ").strip()
+    lower_in = raw_in.lower()
+    if lower_in == "words":
         w = validate_tokens(input("Approx input words: ").strip())
         input_tokens = int(round(w * 0.75))
-    elif raw_in == "chars":
+    elif lower_in == "chars":
         c = validate_tokens(input("Approx input characters: ").strip())
         input_tokens = int(round(c / 4))
     else:
-        input_tokens = validate_tokens(raw_in)
-    raw_out = input("Output tokens (e.g., 2000, 100k) or type 'words'/'chars': ").strip().lower()
-    if raw_out == "words":
+        try:
+            input_tokens = validate_tokens(raw_in)
+        except Exception:
+            input_tokens = estimate_tokens_from_text(raw_in)
+            print(f"Estimated input tokens: {input_tokens}")
+    raw_out = input("Output tokens (e.g., 2000, 100k), type 'words'/'chars', or paste text: ").strip()
+    lower_out = raw_out.lower()
+    if lower_out == "words":
         w = validate_tokens(input("Approx output words: ").strip())
         output_tokens = int(round(w * 0.75))
-    elif raw_out == "chars":
+    elif lower_out == "chars":
         c = validate_tokens(input("Approx output characters: ").strip())
         output_tokens = int(round(c / 4))
     else:
-        output_tokens = validate_tokens(raw_out)
+        try:
+            output_tokens = validate_tokens(raw_out)
+        except Exception:
+            output_tokens = estimate_tokens_from_text(raw_out)
+            print(f"Estimated output tokens: {output_tokens}")
     budget_str = input("Budget USD (optional, supports k/m/b; e.g., 100, 1k, 10k): ").strip()
     budget = parse_budget(budget_str)
     compare = input("Compare across providers/models? [y/N]: ").strip().lower() == "y"
