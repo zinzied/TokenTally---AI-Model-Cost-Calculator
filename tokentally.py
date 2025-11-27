@@ -109,6 +109,23 @@ CAPABILITY_TIERS: Dict[str, Dict[str, str]] = {
     "meta": {"llama-3-70b-instruct": "tier-4", "llama 3 70b instruct": "tier-4", "llama-3-8b-instruct": "tier-3", "llama 3 8b instruct": "tier-3"},
 }
 
+TOKEN_ENCODINGS: Dict[str, str] = {
+    "openai": "cl100k_base",
+    "anthropic": "cl100k_base",
+    "google": "cl100k_base",
+    "xai": "cl100k_base",
+    "cohere": "cl100k_base",
+    "mistral": "cl100k_base",
+    "meta": "cl100k_base",
+}
+
+TEMPLATES: Dict[str, Tuple[int, int]] = {
+    "qa": (500, 300),
+    "summary": (2000, 600),
+    "code": (3000, 1200),
+    "report": (8000, 2000),
+}
+
 
 @dataclass
 class ModelPrice:
@@ -205,6 +222,13 @@ def estimate_tokens_from_text(text: str, model: Optional[str] = None) -> int:
         except Exception:
             pass
     return int(round(len(text) / 4))
+
+def convert_currency(amount_usd: float, target_currency: Optional[str], fx_rate: Optional[float]) -> Optional[float]:
+    if not target_currency:
+        return None
+    if fx_rate is None or fx_rate <= 0:
+        return None
+    return amount_usd * fx_rate
 
 def show_banner_animated() -> None:
     global _BANNER_SHOWN
@@ -357,6 +381,8 @@ def make_table_rows(
     registry: PricingRegistry,
     jobs: List[Dict[str, Any]],
     budget_usd: Optional[float],
+    currency: Optional[str] = None,
+    fx_rate: Optional[float] = None,
 ) -> Tuple[List[List[str]], List[Dict[str, Any]]]:
     table: List[List[str]] = []
     csv_rows: List[Dict[str, Any]] = []
@@ -366,6 +392,8 @@ def make_table_rows(
         if not mp:
             raise ValueError(f"Missing pricing for {provider}:{model}")
         total_usd = calculate_cost(job["input_tokens"], job["output_tokens"], mp.input_price, mp.output_price)
+        extra = float(job.get("extra_cost_usd", 0.0))
+        total_usd = total_usd + extra
         per_1k = cost_per_1k(mp.input_price, mp.output_price)
         pct_budget = (total_usd / budget_usd * 100.0) if budget_usd else None
         sev = severity_from_cost(total_usd, budget_usd)
@@ -374,6 +402,8 @@ def make_table_rows(
         pct_str = f"{pct_budget:.3f}%" if pct_budget is not None else "-"
         base_currency = mp.currency
         base_cost_str = f"{total_usd:,.6f} {base_currency}"
+        converted = convert_currency(total_usd, currency, fx_rate)
+        converted_str = f"{converted:,.6f} {currency}" if converted is not None else "-"
         table.append(
             [
                 provider,
@@ -382,6 +412,7 @@ def make_table_rows(
                 str(job["output_tokens"]),
                 base_cost_str,
                 f"${total_usd:,.6f}",
+                converted_str,
                 per_1k_str,
                 pct_str,
                 total_str,
@@ -400,6 +431,8 @@ def make_table_rows(
                 "cost_per_1k_tokens_usd": round(per_1k, 6),
                 "budget_usd": round(budget_usd, 6) if budget_usd else "",
                 "budget_pct": round(pct_budget, 6) if pct_budget is not None else "",
+                "converted_currency": currency or "",
+                "converted_cost": round(converted, 6) if converted is not None else "",
             }
         )
     return table, csv_rows
@@ -428,6 +461,19 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser.add_argument("--simulate", action="store_true", help="Simulate cost optimization scenarios")
     parser.add_argument("--simulate-input-tokens", type=int, help="Input tokens for simulation")
     parser.add_argument("--simulate-output-tokens", type=int, help="Output tokens for simulation")
+    parser.add_argument("--currency", required=False, help="Target currency code for conversion (e.g., EUR)")
+    parser.add_argument("--fx-rate", required=False, type=float, help="USD to target currency rate")
+    parser.add_argument("--per-request-fee", required=False, type=float, help="Additional per-request USD fee")
+    parser.add_argument("--audio-minutes", required=False, type=float, help="Audio minutes for job")
+    parser.add_argument("--audio-rate", required=False, type=float, help="USD per audio minute")
+    parser.add_argument("--image-count", required=False, type=int, help="Image count for job")
+    parser.add_argument("--image-rate", required=False, type=float, help="USD per image")
+    parser.add_argument("--template", required=False, choices=["qa", "summary", "code", "report"], help="Usage template for typical tokens")
+    parser.add_argument("--template-scale", required=False, type=float, help="Scale factor to adjust template tokens")
+    parser.add_argument("--planner", action="store_true", help="Monthly planner: simulate monthly spend")
+    parser.add_argument("--requests-per-day", required=False, type=int, help="Requests per day for planner")
+    parser.add_argument("--days", required=False, type=int, help="Number of days for planner")
+    parser.add_argument("--alarm-threshold-pct", required=False, type=float, help="Warn when job cost exceeds this percent of budget")
     return parser.parse_args(argv)
 
 
@@ -740,7 +786,7 @@ def run_demo(registry: PricingRegistry) -> None:
     else:
         p, m = validate_provider_model(registry, provider, model)
         jobs.append({"provider": p, "model": m, "input_tokens": input_tokens, "output_tokens": output_tokens})
-    table, csv_rows = make_table_rows(registry, jobs, budget)
+    table, csv_rows = make_table_rows(registry, jobs, budget, None, None)
     headers = [
         "Provider",
         "Model",
@@ -764,6 +810,63 @@ def run_demo(registry: PricingRegistry) -> None:
         write_csv(path, csv_rows)
         print(f"\nCSV exported to: {path}")
 
+def run_planner(
+    registry: PricingRegistry,
+    provider: Optional[str],
+    model: Optional[str],
+    input_tokens: int,
+    output_tokens: int,
+    requests_per_day: int,
+    days: int,
+    currency: Optional[str],
+    fx_rate: Optional[float],
+    per_request_fee: float,
+    audio_minutes: float,
+    audio_rate: float,
+    image_count: int,
+    image_rate: float,
+) -> None:
+    jobs: List[Dict[str, Any]] = []
+    total_requests = max(0, requests_per_day) * max(0, days)
+    extra_per_req = 0.0
+    extra_per_req += float(per_request_fee or 0.0)
+    extra_per_req += float(audio_minutes or 0.0) * float(audio_rate or 0.0)
+    extra_per_req += int(image_count or 0) * float(image_rate or 0.0)
+    if model and provider:
+        p, m = validate_provider_model(registry, provider, model)
+        jobs.append({"provider": p, "model": m, "input_tokens": input_tokens, "output_tokens": output_tokens, "extra_cost_usd": extra_per_req})
+    else:
+        for p in registry.providers():
+            for m in registry.models(p):
+                jobs.append({"provider": p, "model": m, "input_tokens": input_tokens, "output_tokens": output_tokens, "extra_cost_usd": extra_per_req})
+    table, csv_rows = make_table_rows(registry, jobs, None, currency, fx_rate)
+    headers = ["Provider", "Model", "Input Tokens", "Output Tokens", "Base Cost", "USD Cost", "Converted Cost", "Cost / 1K", "Budget %", "Severity"]
+    if tabulate:
+        print(tabulate(table, headers=headers, tablefmt="github"))
+    else:
+        print(headers)
+        for row in table:
+            print(row)
+    print()
+    totals: List[List[str]] = []
+    for r in csv_rows:
+        usd_cost = float(r["usd_cost"]) * total_requests
+        converted_cost = r.get("converted_cost")
+        conv = float(converted_cost) * total_requests if converted_cost != "" else None
+        totals.append([
+            r["provider"],
+            r["model"],
+            f"${usd_cost:,.6f}",
+            f"{conv:,.6f} {r.get('converted_currency')}" if conv is not None else "-",
+        ])
+    t_headers = ["Provider", "Model", "Monthly USD Cost", "Monthly Converted Cost"]
+    if tabulate:
+        print(tabulate(totals, headers=t_headers, tablefmt="github"))
+    else:
+        print(t_headers)
+        for row in totals:
+            print(row)
+
 
 def run_single(
     registry: PricingRegistry,
@@ -774,6 +877,10 @@ def run_single(
     budget: Optional[float],
     compare: bool,
     export_csv: Optional[str],
+    currency: Optional[str] = None,
+    fx_rate: Optional[float] = None,
+    extra_cost_usd: float = 0.0,
+    alarm_threshold_pct: Optional[float] = None,
 ) -> None:
     if colorama_init:
         try:
@@ -797,7 +904,7 @@ def run_single(
         p, m = validate_provider_model(registry, provider, model)
         jobs.append({"provider": p, "model": m, "input_tokens": input_tokens, "output_tokens": output_tokens})
 
-    table, csv_rows = make_table_rows(registry, jobs, budget)
+    table, csv_rows = make_table_rows(registry, jobs, budget, currency, fx_rate)
     headers = [
         "Provider",
         "Model",
@@ -805,6 +912,7 @@ def run_single(
         "Output Tokens",
         "Base Cost",
         "USD Cost",
+        "Converted Cost",
         "Cost / 1K",
         "Budget %",
         "Severity",
@@ -844,6 +952,11 @@ def run_single(
         path = export_csv if export_csv else default_csv_path()
         write_csv(path, csv_rows)
         print(f"\nCSV exported to: {path}")
+    if alarm_threshold_pct and budget and budget > 0:
+        for r in csv_rows:
+            pct = r.get("budget_pct")
+            if pct and pct != "" and float(pct) >= alarm_threshold_pct:
+                print("Warning: cost exceeds threshold percent of budget")
 
 
 def run_batch(registry: PricingRegistry, batch_path: str, budget: Optional[float], export_csv: Optional[str]) -> None:
@@ -1028,10 +1141,37 @@ def main(argv: Optional[List[str]] = None) -> None:
         input("Press Enter to exit...")
         return
 
+    if args.planner:
+        ip = args.input_tokens or 0
+        op = args.output_tokens or 0
+        if args.template:
+            base = TEMPLATES.get(args.template)
+            if base:
+                scale = float(args.template_scale or 1.0)
+                ip = int(base[0] * scale)
+                op = int(base[1] * scale)
+        run_planner(
+            registry=registry,
+            provider=args.provider,
+            model=args.model,
+            input_tokens=ip,
+            output_tokens=op,
+            requests_per_day=int(args.requests_per_day or 0),
+            days=int(args.days or 0),
+            currency=args.currency,
+            fx_rate=args.fx_rate,
+            per_request_fee=float(args.per_request_fee or 0.0),
+            audio_minutes=float(args.audio_minutes or 0.0),
+            audio_rate=float(args.audio_rate or 0.0),
+            image_count=int(args.image_count or 0),
+            image_rate=float(args.image_rate or 0.0),
+        )
+        return
+
     if args.batch_file:
         if not os.path.isfile(args.batch_file):
             raise FileNotFoundError(f"Batch file not found: {args.batch_file}")
-        run_batch(registry, args.batch_file, args.budget, args.export_csv)
+        run_batch(registry, args.batch_file, args.budget, args.export_csv, args.currency, args.fx_rate)
         return
 
     if args.input_tokens is None:
@@ -1048,6 +1188,23 @@ def main(argv: Optional[List[str]] = None) -> None:
     if not args.model or args.input_tokens is None or args.output_tokens is None:
         raise ValueError("Required: --model, --input-tokens, --output-tokens or provide estimation flags")
 
+    extra_cost = 0.0
+    if args.per_request_fee:
+        extra_cost += float(args.per_request_fee)
+    if args.audio_minutes and args.audio_rate:
+        extra_cost += float(args.audio_minutes) * float(args.audio_rate)
+    if args.image_count and args.image_rate:
+        extra_cost += int(args.image_count) * float(args.image_rate)
+
+    if args.template and (args.input_tokens is None or args.output_tokens is None):
+        base = TEMPLATES.get(args.template)
+        if base:
+            scale = float(args.template_scale or 1.0)
+            if args.input_tokens is None:
+                args.input_tokens = int(base[0] * scale)
+            if args.output_tokens is None:
+                args.output_tokens = int(base[1] * scale)
+
     run_single(
         registry=registry,
         provider=args.provider,
@@ -1057,6 +1214,10 @@ def main(argv: Optional[List[str]] = None) -> None:
         budget=args.budget,
         compare=bool(args.compare),
         export_csv=args.export_csv,
+        currency=args.currency,
+        fx_rate=args.fx_rate,
+        extra_cost_usd=extra_cost,
+        alarm_threshold_pct=args.alarm_threshold_pct,
     )
 
 
