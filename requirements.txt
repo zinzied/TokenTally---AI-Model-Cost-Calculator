@@ -8,3 +8,4 @@ uvicorn[standard]
 apscheduler
 pydantic
 playwright
+tiktoken
