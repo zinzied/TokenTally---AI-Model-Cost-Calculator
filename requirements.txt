@@ -1,0 +1,10 @@
+tabulate
+colorama
+requests
+beautifulsoup4
+lxml
+fastapi
+uvicorn[standard]
+apscheduler
+pydantic
+playwright

@@ -1,0 +1,187 @@
+{
+  "pricing": {
+    "openai": {
+      "gpt-4o": {
+        "input_cost_per_1M_tokens": 5.0,
+        "output_cost_per_1M_tokens": 15.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://openai.com/api/pricing/"
+      },
+      "gpt-4-turbo": {
+        "input_cost_per_1M_tokens": 10.0,
+        "output_cost_per_1M_tokens": 30.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://openai.com/api/pricing/"
+      },
+      "gpt 5.1": {
+        "input_cost_per_1M_tokens": 8.0,
+        "output_cost_per_1M_tokens": 24.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://openai.com/api/pricing/"
+      },
+      "gpt-5.1": {
+        "input_cost_per_1M_tokens": 8.0,
+        "output_cost_per_1M_tokens": 24.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://openai.com/api/pricing/"
+      }
+    },
+    "anthropic": {
+      "claude-3-opus": {
+        "input_cost_per_1M_tokens": 15.0,
+        "output_cost_per_1M_tokens": 75.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://anthropic.com/pricing"
+      },
+      "claude-3-sonnet": {
+        "input_cost_per_1M_tokens": 3.0,
+        "output_cost_per_1M_tokens": 15.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://anthropic.com/pricing"
+      },
+      "opus 4.5": {
+        "input_cost_per_1M_tokens": 12.0,
+        "output_cost_per_1M_tokens": 60.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://anthropic.com/pricing"
+      },
+      "claude-4.5-opus": {
+        "input_cost_per_1M_tokens": 12.0,
+        "output_cost_per_1M_tokens": 60.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://anthropic.com/pricing"
+      }
+    },
+    "xai": {
+      "grok 4.1": {
+        "input_cost_per_1M_tokens": 4.0,
+        "output_cost_per_1M_tokens": 20.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://console.grok.com/pricing"
+      },
+      "grok-4.1": {
+        "input_cost_per_1M_tokens": 4.0,
+        "output_cost_per_1M_tokens": 20.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://console.grok.com/pricing"
+      }
+    },
+    "google": {
+      "gemini-1.5-pro": {
+        "input_cost_per_1M_tokens": 4.0,
+        "output_cost_per_1M_tokens": 16.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "gemini 1.5 pro": {
+        "input_cost_per_1M_tokens": 4.0,
+        "output_cost_per_1M_tokens": 16.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "gemini-1.5-flash": {
+        "input_cost_per_1M_tokens": 1.0,
+        "output_cost_per_1M_tokens": 3.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "gemini 1.5 flash": {
+        "input_cost_per_1M_tokens": 1.0,
+        "output_cost_per_1M_tokens": 3.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      }
+    },
+    "cohere": {
+      "command-r-plus": {
+        "input_cost_per_1M_tokens": 3.0,
+        "output_cost_per_1M_tokens": 12.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "command r plus": {
+        "input_cost_per_1M_tokens": 3.0,
+        "output_cost_per_1M_tokens": 12.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "command-r": {
+        "input_cost_per_1M_tokens": 1.5,
+        "output_cost_per_1M_tokens": 6.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      },
+      "command r": {
+        "input_cost_per_1M_tokens": 1.5,
+        "output_cost_per_1M_tokens": 6.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+      }
+    },
+    "mistral": {
+      "mistral-large": {
+        "input_cost_per_1M_tokens": 2.0,
+        "output_cost_per_1M_tokens": 6.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://mistral.ai/technology/#pricing"
+      },
+      "mistral large": {
+        "input_cost_per_1M_tokens": 2.0,
+        "output_cost_per_1M_tokens": 6.0,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://mistral.ai/technology/#pricing"
+      },
+      "mistral-small": {
+        "input_cost_per_1M_tokens": 0.6,
+        "output_cost_per_1M_tokens": 1.8,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://mistral.ai/technology/#pricing"
+      },
+      "mistral small": {
+        "input_cost_per_1M_tokens": 0.6,
+        "output_cost_per_1M_tokens": 1.8,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://mistral.ai/technology/#pricing"
+      }
+    },
+    "meta": {
+      "llama-3-70b-instruct": {
+        "input_cost_per_1M_tokens": 0.8,
+        "output_cost_per_1M_tokens": 0.8,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://ai.meta.com/llama/"
+      },
+      "llama 3 70b instruct": {
+        "input_cost_per_1M_tokens": 0.8,
+        "output_cost_per_1M_tokens": 0.8,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://ai.meta.com/llama/"
+      },
+      "llama-3-8b-instruct": {
+        "input_cost_per_1M_tokens": 0.2,
+        "output_cost_per_1M_tokens": 0.2,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://ai.meta.com/llama/"
+      },
+      "llama 3 8b instruct": {
+        "input_cost_per_1M_tokens": 0.2,
+        "output_cost_per_1M_tokens": 0.2,
+        "update_date": "2025-11-27T07:46:12.398338Z",
+        "source_url": "https://ai.meta.com/llama/"
+      }
+    }
+  },
+  "metadata": {
+    "last_updated": "2025-11-27T07:46:12.398338Z",
+    "version": "1.0.0"
+  },
+  "sources": {
+    "openai": "https://openai.com/api/pricing/",
+    "anthropic": "https://anthropic.com/pricing",
+    "xai": "https://console.grok.com/pricing",
+    "google": "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+    "cohere": "https://cloud.google.com/vertex-ai/generative-ai/pricing",
+    "mistral": "https://mistral.ai/technology/#pricing",
+    "meta": "https://ai.meta.com/llama/"
+  }
+}
